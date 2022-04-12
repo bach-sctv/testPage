@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <title>Datepicker, Knockoutjs Survey Library Example</title><meta name="viewport" content="width=device-width"/>
+        <script src="https://unpkg.com/jquery"></script>
+        <script src="https://unpkg.com/knockout@3.5.1/build/output/knockout-latest.js"></script>
+        <script src="https://unpkg.com/survey-core@1.9.23/survey.core.min.js"></script>
+        <script src="https://unpkg.com/survey-core@1.9.23/survey.i18n.min.js"></script>
+        <script src="https://unpkg.com/survey-knockout-ui@1.9.23/survey-knockout-ui.min.js"></script>
+        <link href="https://unpkg.com/survey-core@1.9.23/modern.min.css" type="text/css" rel="stylesheet"/>
+        <link rel="stylesheet" href="./index.css">
+        <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script><link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/smoothness/jquery-ui.css" type="text/css" rel="stylesheet"/>
+        <script src="https://unpkg.com/surveyjs-widgets@1.9.23/surveyjs-widgets.min.js"></script>
+    </head>
+    <body>
+        <div id="surveyElement" style="display:inline-block;width:100%;"></div>
+        <div id="surveyResult"></div>
+        <script type="text/javascript" src="./index1.js"></script>
+    </body>
+</html>
+
+<script>
+    Survey.StylesManager.applyTheme('bootstrap');
+
+function changeLocale(langCode) {
+		survey.locale = langCode;
+		survey.render();
+		$.datepicker.setDefaults($.datepicker.regional[survey.locale]);
+		console.log(langCode);
+}
+
+$.datepicker.regional["ja"] = {
+monthNames: ['1月', '2月', '3月', '4月', '5月', '6月','7月', '8月', '9月', '10月', '11月', '12月'],
+		monthNamesShort: ['1月', '2月', '3月', '4月', '5月', '6月','7月', '8月', '9月', '10月', '11月', '12月'],
+		dayNames: ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日'],
+		dayNamesShort: ['日', '月', '火', '水', '木', '金', '土', '日'],
+		dayNamesMin: ['日', '月', '火', '水', '木', '金', '土', '日'],
+		showMonthAfterYear: true,
+		// weekHeader: "Sem.",
+		// firstDay: 0,
+		// isRTL: false,
+		// minDate: new Date(),
+		// maxDate: '+0d',
+		// yearSuffix: "年"
+};
+var json = {
+		elements: [
+				{
+						name: '質問1',
+						type: 'datepicker',
+						inputType: 'date',
+						title: '今日の日付は？',
+						"dateFormat": "yy年mm月dd日",
+						isRequired: true,
+						config: {
+								changeYear: true,
+								changeMonth: true,
+						},
+				},       
+		],
+};
+
+function modifySurveyResults() {
+		var resultData = [];
+		console.log('surveydata',survey.data);
+		for(var key in survey.data) {
+				var question = survey.getQuestionByValueName(key);
+				console.log('question',key, question);
+				if (question.getType() == "datepicker") {
+						console.log('date value is:', question.value, new Date(question.value));
+						b=$.datepicker.formatDate(question.value, new Date(question.value));
+						console.log(b);
+						question.value = b;
+				}
+
+				if(!!question) {
+				var item = {};
+				item[key]=question.value;
+				resultData.push(item);
+				}
+
+		}
+		console.log('resultdata',resultData);
+		return resultData;
+		}
+
+		survey = new Survey.Model(json);
+
+		survey.onComplete.add(function (sender) {
+	    document.querySelector('#surveyResult').textContent =
+	        'Result JSON:\n' + JSON.stringify(modifySurveyResults(), null, 3);
+					
+	});
+
+		survey.render('surveyElement');
+		changeLocale('ja');
+</script>
